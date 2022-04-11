@@ -58,16 +58,18 @@ def set_payoffs(group: Group):
         else:
             group.num_list += str(player.guess_num)
 
+    # 算出平均值，並乘以p值
     mean = total / len(group.get_players())
     p_mean = mean * C.p
     min_distance = 100
 
+    # 算出每個數字與p*mean的差，並記錄最小的差為多少
     for p in group.get_players():
         if abs(players_guess_dict[p] - p_mean) <= min_distance:
             min_distance = abs(players_guess_dict[p] - p_mean)
 
     
-    n_winners = 0
+    n_winners = 0 # 有多少個贏家
     # 判斷獲勝的受試者，並給予對應的報酬
     for player, num in players_guess_dict.items():
 
@@ -121,4 +123,3 @@ class Finish(Page):
 
 
 page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
-
