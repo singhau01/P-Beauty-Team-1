@@ -1,0 +1,39 @@
+{{ block title }}
+    最小唯一正整數 –– 說明
+{{ endblock }}
+
+{{ block content }}
+    
+    <p>
+        本遊戲共有 {{ C.NUM_ROUNDS }} 回合。</p>
+    
+    <p>
+        每一回合中，請您從最小為 {{ C.min_number }}、最大為 {{ C.max_number }} 的區間中，挑選一個正整數。<br>
+        當所有參與者皆輸入完畢，將揭曉「唯一且最小」的正整數，意即在所有參與者的答案中，最小、又沒有與他人重複的數字。<br>
+    </p>
+
+    <p>
+        若您的數字是最小唯一正整數，您就是該回合的贏家，將可獲得 {{ C.winning_prize }} 點報酬。<br>
+        若不是，可獲得 {{ C.consolation_prize }} 點報酬。<br>
+        {{ C.NUM_ROUNDS }} 回合結束後，將顯示您本次遊戲的總報酬。
+    </p>
+
+    <p>
+        每一回合的決策時間是 {{ C.timeout_sec }} 秒。
+        倒數 {{ C.timer_sec }} 秒時，畫面會顯示倒數計時器。倒數 {{ C.alert_sec }} 秒時，會出現紅字提醒您作答。
+    </p>
+
+    <p>
+        若已了解遊戲規則，請點擊下方「Next」，開始第一回合遊戲。
+    </p>
+
+    {{ next_button }}
+
+    <style>
+        .debug-info {
+            display: none;
+        }
+    </style>
+{{ endblock }}
+
+

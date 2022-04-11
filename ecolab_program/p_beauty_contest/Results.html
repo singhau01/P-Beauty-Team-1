@@ -1,0 +1,60 @@
+{{ block title }}
+    最小唯一正整數 –– 結果
+{{ endblock }}
+
+{{ block content }}
+    
+    <style>
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+
+    <p>
+        Round: {{ player.round_number }}
+    </p>
+
+    <p>
+        {{ if player.is_no_decision }}
+            您未在時限內作答！
+        {{ else }}
+            您的數字為 {{ player.guess_num }}。
+        {{ endif }}
+    </p>
+
+    <p>
+    {{ if group.p_mean_num == 0}}
+        本回合的唯一最小正整數不存在！
+    {{ else }}
+        本回合贏家的數字是：{{ group.p_mean_num }}<br>
+        {{ group.num_list }}
+
+    {{ endif }}
+    </p>
+
+
+    {{ if player.is_winner }}
+        <p class="highlight">
+            恭喜您是贏家！
+        </p>
+
+    {{ else }}
+        <p>
+            很抱歉，您未能獲勝。
+        </p>
+    {{ endif }}
+
+    <p>
+        您在本回合的報酬為 <span class="highlight"> {{ player.payoff }} </span>。
+    </p>
+
+    <style>
+        .debug-info {
+            display: none;
+        }
+    </style>
+    {{ next_button }}
+{{ endblock }}
+
+
