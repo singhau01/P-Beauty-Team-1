@@ -9,8 +9,8 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 2
+    PLAYERS_PER_GROUP = 2
+    NUM_ROUNDS = 1
 
     timeout_sec = 30  # 每一回合的決策時間
     timer_sec = 20  # 出現timer的剩餘時間
@@ -27,6 +27,7 @@ class C(BaseConstants):
 
 class Subsession(BaseSubsession):
     pass
+    
 
 
 class Group(BaseGroup):
@@ -35,20 +36,11 @@ class Group(BaseGroup):
 
 
 class Player(BasePlayer):
-    
     guess_num = models.IntegerField(min=C.min_number, max=C.max_number, label='請輸入您所猜測的非負整數：')
     is_winner = models.BooleanField(initial=False)
     
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
-
-    name = models.StringField(label="你的名字：")
-    age = models.IntegerField(label="你的年紀：")
-    is_eco_or_man_stu = models.BooleanField(label="是否為經濟系或管理學院")
-    has_studied_eco_class = models.BooleanField(label="有沒有修過經濟學的課")
-    know_pbeauty = models.BooleanField(label="有沒有聽過p-beauty contest")
-    guess_goal = models.LongStringField(label="猜猜看實驗目的")
-    
 
 
 # FUNCTIONS
@@ -128,12 +120,5 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
-class Survey(Page):
-    @staticmethod
-    def is_displayed(player):
-        return player.round_number == C.NUM_ROUNDS
 
-    form_model = "player"
-    form_fields = ["name", "age", "is_eco_or_man_stu", "has_studied_eco_class", "know_pbeauty", "guess_goal"]
-
-page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Survey, Finish]
+page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
