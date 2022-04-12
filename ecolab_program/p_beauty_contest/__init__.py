@@ -10,7 +10,7 @@ doc = """
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 3
 
     timeout_sec = 30  # 每一回合的決策時間
     timer_sec = 20  # 出現timer的剩餘時間
@@ -31,6 +31,8 @@ class Subsession(BaseSubsession):
 
 
 class Group(BaseGroup):
+    time_pressure = models.BooleanField
+    is_treatment = models.BooleanField(initial=False)  #實驗組與控制組
     p_mean_num = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
     num_list = models.StringField(initial="被選到的號碼有：")
 
@@ -44,6 +46,13 @@ class Player(BasePlayer):
 
 
 # FUNCTIONS
+def creating_session(subsession):  # 把組別劃分成實驗組與控制組
+    import itertools
+    treatment = itertools.cycle([True, False])
+    for group in subsession.get_groups():
+        group.is_treatment = next(treatment)
+
+
 def set_payoffs(group: Group):
     players_guess_dict = {}  # {guess_num: players}
     total = 0
