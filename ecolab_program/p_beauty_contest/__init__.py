@@ -42,6 +42,13 @@ class Player(BasePlayer):
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
 
+    name = models.StringField(label="你的名字：")
+    age = models.IntegerField(label="你的年紀：")
+    is_eco_or_man_stu = models.BooleanField(label="是否為經濟系或管理學院")
+    has_studied_eco_class = models.BooleanField(label="有沒有修過經濟學的課")
+    know_pbeauty = models.BooleanField(label="有沒有聽過p-beauty contest")
+    guess_goal = models.LongStringField(label="猜猜看實驗目的")
+    
 
 
 # FUNCTIONS
@@ -121,5 +128,12 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
+class Survey(Page):
+    @staticmethod
+    def is_displayed(player):
+        return player.round_number == C.NUM_ROUNDS
 
-page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
+    form_model = "player"
+    form_fields = ["name", "age", "is_eco_or_man_stu", "has_studied_eco_class", "know_pbeauty", "guess_goal"]
+
+page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Survey, Finish]
