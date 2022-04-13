@@ -47,10 +47,20 @@ class Player(BasePlayer):
 
 # FUNCTIONS
 def creating_session(subsession):  # 把組別劃分成實驗組與控制組
-    import itertools
-    treatment = itertools.cycle([True, False])
+    import random
+    treatment_list = []
+
+    # 做一份實驗與控制組的清單，並且隨機排列
+    i = 0 
+    while i != len(subsession.get_groups()):  
+        treatment_list.append(True)
+        treatment_list.append(False)
+        i += 2
+    p = 0
+    random.shuffle(treatment_list)
     for group in subsession.get_groups():
-        group.is_treatment = next(treatment)
+        group.is_treatment = treatment_list[p]
+        p += 1
 
 
 def set_payoffs(group: Group):
