@@ -5,11 +5,8 @@ SESSION_CONFIGS = [
     dict(
         name='p_beauty_contest',
         display_name="p-beauty-contest",
-        app_sequence=['p_beauty_contest'],
-        num_demo_participants=3,
-    ),
-    dict(
-        name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
+        app_sequence=['p_beauty_contest', "survey"],
+        num_demo_participants=16,
     ),
 ]
 

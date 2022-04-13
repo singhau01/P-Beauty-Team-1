@@ -9,8 +9,8 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = None
-    NUM_ROUNDS = 2
+    PLAYERS_PER_GROUP = 2
+    NUM_ROUNDS = 3
 
     timeout_sec = 30  # 每一回合的決策時間
     timer_sec = 20  # 出現timer的剩餘時間
@@ -27,15 +27,17 @@ class C(BaseConstants):
 
 class Subsession(BaseSubsession):
     pass
+    
 
 
 class Group(BaseGroup):
+    time_pressure = models.BooleanField
+    is_treatment = models.BooleanField(initial=False)  #實驗組與控制組
     p_mean_num = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
     num_list = models.StringField(initial="被選到的號碼有：")
 
 
 class Player(BasePlayer):
-    
     guess_num = models.IntegerField(min=C.min_number, max=C.max_number, label='請輸入您所猜測的非負整數：')
     is_winner = models.BooleanField(initial=False)
     
@@ -43,8 +45,24 @@ class Player(BasePlayer):
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
 
 
-
 # FUNCTIONS
+def creating_session(subsession):  # 把組別劃分成實驗組與控制組
+    import random
+    treatment_list = []
+
+    # 做一份實驗與控制組的清單，並且隨機排列
+    i = 0 
+    while i != len(subsession.get_groups()):  
+        treatment_list.append(True)
+        treatment_list.append(False)
+        i += 2
+    p = 0
+    random.shuffle(treatment_list)
+    for group in subsession.get_groups():
+        group.is_treatment = treatment_list[p]
+        p += 1
+
+
 def set_payoffs(group: Group):
     players_guess_dict = {}  # {guess_num: players}
     total = 0
@@ -58,16 +76,18 @@ def set_payoffs(group: Group):
         else:
             group.num_list += str(player.guess_num)
 
+    # 算出平均值，並乘以p值
     mean = total / len(group.get_players())
     p_mean = mean * C.p
     min_distance = 100
 
+    # 算出每個數字與p*mean的差，並記錄最小的差為多少
     for p in group.get_players():
         if abs(players_guess_dict[p] - p_mean) <= min_distance:
             min_distance = abs(players_guess_dict[p] - p_mean)
 
     
-    n_winners = 0
+    n_winners = 0 # 有多少個贏家
     # 判斷獲勝的受試者，並給予對應的報酬
     for player, num in players_guess_dict.items():
 
@@ -121,4 +141,3 @@ class Finish(Page):
 
 
 page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
-
