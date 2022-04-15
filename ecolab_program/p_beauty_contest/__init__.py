@@ -9,8 +9,8 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 3
+    PLAYERS_PER_GROUP = 13
+    NUM_ROUNDS = 4
 
     timeout_sec = 30  # 每一回合的決策時間
     timer_sec = 20  # 出現timer的剩餘時間
@@ -22,6 +22,12 @@ class C(BaseConstants):
 
     winning_prize = 100
     consolation_prize = 10
+    
+    big_group_player_num = 10
+    small_group_player_num = 3
+
+
+
 
 
 
@@ -33,74 +39,122 @@ class Subsession(BaseSubsession):
 class Group(BaseGroup):
     time_pressure = models.BooleanField
     is_treatment = models.BooleanField(initial=False)  #實驗組與控制組
-    p_mean_num = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
-    num_list = models.StringField(initial="被選到的號碼有：")
+    p_mean_num_big = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
+    num_list_big = models.StringField(initial="被選到的號碼有：")
+
+    p_mean_num_small = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
+    num_list_small = models.StringField(initial="被選到的號碼有：")
 
 
 class Player(BasePlayer):
     guess_num = models.IntegerField(min=C.min_number, max=C.max_number, label='請輸入您所猜測的非負整數：')
     is_winner = models.BooleanField(initial=False)
+    is_big_group =  models.BooleanField(initial=False)
     
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
 
 
 # FUNCTIONS
-def creating_session(subsession):  # 把組別劃分成實驗組與控制組
-    import random
-    treatment_list = []
 
-    # 做一份實驗與控制組的清單，並且隨機排列
-    i = 0 
-    while i != len(subsession.get_groups()):  
-        treatment_list.append(True)
-        treatment_list.append(False)
-        i += 2
-    p = 0
-    random.shuffle(treatment_list)
-    for group in subsession.get_groups():
-        group.is_treatment = treatment_list[p]
-        p += 1
+def creating_session(subsession):  # 把組別劃分成實驗組與控制組、大組或小組
+    import random
+
+    if subsession.round_number == 1:
+
+        treatment = random.sample(subsession.get_players, C.PLAYERS_PER_GROUP) # 一半分到對照組，一半分到實驗組
+        control = list(set(subsession.get_players) - set(treatment))
+
+        treatment_big = random.sample(treatment, C.big_number) # 實驗組抽10個，分為大組
+        treatment_small = list(set(treatment) - set(treatment_big)) # 實驗組剩3個為小組
+        control_big = random.sample(control, C.big_number) # 控制組抽10個，分為大組
+        control_small = list(set(control) - set(control_big)) # 控制組抽3個，分為小組
+
+        for player in Group.get_players:
+            if Group.get_players == treatment:
+                Group.treatment == True
+        
+        for player in subsession.get_players:
+            participant = Player.participant
+            if player in treatment_big or player in control_big:
+                participant.is_big_group = True
+
+            
+
+
+
 
 
 def set_payoffs(group: Group):
-    players_guess_dict = {}  # {guess_num: players}
-    total = 0
-    p_mean = 0
+    players_guess_dict_big = {}  # {guess_num: players}
+    players_guess_dict_small = {}
+    total_big = 0
+    total_small = 0
+    
+    p_mean_num_big = 0
+    p_mean_num_small = 0
+
     # 將所有受試者的數字以 dictionary 形式存下來
     for player in group.get_players():
-        players_guess_dict[player] = player.guess_num
-        total += player.guess_num
-        if player != group.get_players()[-1]:
-            group.num_list += str(player.guess_num) + "、"
+        if player.participant.is_big_group:
+            players_guess_dict_big[player] = player.guess_num
+            total_big += player.guess_num
+            group.num_list_big += str(player.guess_num) + " "
+
         else:
-            group.num_list += str(player.guess_num)
+            players_guess_dict_small[player] = player.guess_num
+            total_small += player.guess_num
+            group.num_list_small += str(player.guess_num) + " "
+        
 
     # 算出平均值，並乘以p值
-    mean = total / len(group.get_players())
-    p_mean = mean * C.p
-    min_distance = 100
+    mean_big = total_big / C.big_group_player_num
+    mean_small = total_small / C.small_group_player_num
+
+    p_mean_big = mean_big * C.p
+    p_mean_small = mean_small * C.p
+    min_distance_big = 100
+    min_distance_small = 100
 
     # 算出每個數字與p*mean的差，並記錄最小的差為多少
     for p in group.get_players():
-        if abs(players_guess_dict[p] - p_mean) <= min_distance:
-            min_distance = abs(players_guess_dict[p] - p_mean)
+        if player.participant.is_big_group == True:
+            if abs(players_guess_dict_big[p] - p_mean_big) <= min_distance_big:
+                min_distance_big = abs(players_guess_dict_big[p] - p_mean_big)
+        else:
+            if abs(players_guess_dict_small[p] - p_mean_small) <= min_distance_small:
+                min_distance_small = abs(players_guess_dict_small[p] - p_mean_small)
+            
 
-    
-    n_winners = 0 # 有多少個贏家
+    n_winners_big = 0 # 有多少個贏家
+    n_winners_small = 0
+
     # 判斷獲勝的受試者，並給予對應的報酬
-    for player, num in players_guess_dict.items():
-
-        if (player.is_no_decision == False) and (abs(num - p_mean) == min_distance):
+    for player, num in players_guess_dict_big.items():
+        if (player.is_no_decision == False) and (abs(num - p_mean_big) == min_distance_big):
             player.is_winner = True
-            n_winners += 1
-            group.p_mean_num = num
+            n_winners_big += 1
+            group.p_mean_num_big = num
         else:
             player.payoff = C.consolation_prize
+    
+    for player, num in players_guess_dict_small.items():
+        if (player.is_no_decision == False) and (abs(num - p_mean_small) == min_distance_small):
+            player.is_winner = True
+            n_winners_small += 1
+            group.p_mean_num_small = num
+        else:
+            player.payoff = C.consolation_prize
+    
 
     for player in group.get_players():
         if player.is_winner:
-            player.payoff = C.winning_prize / n_winners
+            if player.participant.is_big_group:
+                player.payoff = C.winning_prize / n_winners_big
+            else:
+                player.payoff = C.winning_prize / n_winners_small
+
+        
 
 
 # PAGES
