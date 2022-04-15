@@ -25,10 +25,11 @@
 
     <p>
     {{ if group.p_mean_num >= 0 }}
-        {{ if player.participant.is_big_group }}
+        {{ if player.is_big_group }}
             {{ group.p_mean_num_big }}<br>
         {{ else }}
             {{ group.p_mean_num_small }}<br>
+        {{ endif }}
     {{ else }}
         本回合沒有贏家。<br>
         
@@ -36,7 +37,7 @@
     </p>
 
     {{ if group.is_treatment }}
-        {{ if player.participant.is_big_group }}
+        {{ if player.is_big_group }}
         <p>
             {{ group.num_list_big }}<br>
         </p>
@@ -44,6 +45,8 @@
         {{ else }}
         <p>
             {{ group.num_list_small }}<br>
+        
+        {{ endif }}
         </p>
 
     {{ endif }}

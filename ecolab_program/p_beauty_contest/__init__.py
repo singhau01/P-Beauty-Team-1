@@ -9,7 +9,7 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = 13
+    PLAYERS_PER_GROUP = 3
     NUM_ROUNDS = 4
 
     timeout_sec = 30  # 每一回合的決策時間
@@ -23,8 +23,8 @@ class C(BaseConstants):
     winning_prize = 100
     consolation_prize = 10
     
-    big_group_player_num = 10
-    small_group_player_num = 3
+    big_group_player_num = 2
+    small_group_player_num = 1
 
 
 
@@ -75,14 +75,10 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
             if player in treatment:
                 player.group.is_treatment == True
 
-            participant = player.participant
             if player in treatment_big or player in control_big:
-                participant.is_big_group = True
+                player.is_big_group = True
 
             
-
-
-
 
 
 def set_payoffs(group: Group):
@@ -96,7 +92,7 @@ def set_payoffs(group: Group):
 
     # 將所有受試者的數字以 dictionary 形式存下來
     for player in group.get_players():
-        if player.participant.is_big_group:
+        if player.is_big_group == True:
             players_guess_dict_big[player] = player.guess_num
             total_big += player.guess_num
             group.num_list_big += str(player.guess_num) + " "
@@ -118,7 +114,7 @@ def set_payoffs(group: Group):
 
     # 算出每個數字與p*mean的差，並記錄最小的差為多少
     for p in group.get_players():
-        if player.participant.is_big_group == True:
+        if player.is_big_group == True:
             if abs(players_guess_dict_big[p] - p_mean_big) <= min_distance_big:
                 min_distance_big = abs(players_guess_dict_big[p] - p_mean_big)
         else:
@@ -149,7 +145,7 @@ def set_payoffs(group: Group):
 
     for player in group.get_players():
         if player.is_winner:
-            if player.participant.is_big_group:
+            if player.is_big_group:
                 player.payoff = C.winning_prize / n_winners_big
             else:
                 player.payoff = C.winning_prize / n_winners_small
