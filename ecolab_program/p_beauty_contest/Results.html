@@ -24,38 +24,36 @@
     </p>
 
     <p>
-    {{ if group.p_mean_num >= 0 }}
         {{ if player.is_big_group }}
-            {{ group.p_mean_num_big }}<br>
-        {{ else }}
-            {{ group.p_mean_num_small }}<br>
+            {{ if group.p_mean_num_big >= 0}}
+                {{ group.winner_number_big }}<br>
+            {{ else }}
+            本回合沒有贏家
+            {{ endif }}
         {{ endif }}
-    {{ else }}
-        本回合沒有贏家。<br>
-        
-    {{ endif }}
+
+
+        {{ if player.is_small_group }}
+            {{ if group.p_mean_num_small >= 0}}
+                {{ group.winner_number_small }}<br>
+            {{ else }}
+            本回合沒有贏家
+            {{ endif }}
+        {{ endif }}
     </p>
 
     {{ if group.is_treatment }}
         {{ if player.is_big_group }}
-        <p>
             {{ group.num_list_big }}<br>
-        </p>
-
         {{ else }}
-        <p>
             {{ group.num_list_small }}<br>
-        
         {{ endif }}
-        </p>
-
     {{ endif }}
 
     {{ if player.is_winner }}
         <p class="highlight">
             恭喜您是贏家！
         </p>
-
     {{ else }}
         <p>
             很抱歉，您未能獲勝。

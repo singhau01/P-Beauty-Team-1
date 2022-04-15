@@ -39,18 +39,21 @@ class Subsession(BaseSubsession):
 class Group(BaseGroup):
     time_pressure = models.BooleanField
     is_treatment = models.BooleanField(initial=False)  #實驗組與控制組
-    p_mean_num_big = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
-    num_list_big = models.StringField(initial="被選到的號碼有：")
 
-    p_mean_num_small = models.IntegerField(initial=0)  # 每回合的唯一最小正整數
+    num_list_big = models.StringField(initial="被選到的號碼有：")
+    winner_number_big = models.StringField(initial="本回合贏家的數字是：")
+    p_mean_num_big = models.FloatField(initial=-100)
+
     num_list_small = models.StringField(initial="被選到的號碼有：")
+    winner_number_small = models.StringField(initial="本回合的贏家數字是：")
+    p_mean_num_small = models.FloatField(initial=-100)
 
 
 class Player(BasePlayer):
     guess_num = models.IntegerField(min=C.min_number, max=C.max_number, label='請輸入您所猜測的非負整數：')
     is_winner = models.BooleanField(initial=False)
     is_big_group =  models.BooleanField(initial=False)
-    
+    is_small_group = models.BooleanField(initial=False)
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
 
@@ -86,69 +89,93 @@ def set_payoffs(group: Group):
     players_guess_dict_small = {}
     total_big = 0
     total_small = 0
-    
-    p_mean_num_big = 0
-    p_mean_num_small = 0
+    playing_player_big = 0
+    playing_player_small = 0
+
 
     # 將所有受試者的數字以 dictionary 形式存下來
     for player in group.get_players():
-        if player.is_big_group == True:
-            players_guess_dict_big[player] = player.guess_num
-            total_big += player.guess_num
-            group.num_list_big += str(player.guess_num) + " "
+        if player.is_big_group:
+            if player.is_no_decision == False:
+                players_guess_dict_big[player] = player.guess_num
+                total_big += player.guess_num
+                group.num_list_big += str(player.guess_num) + " "
+                playing_player_big += 1
 
         else:
-            players_guess_dict_small[player] = player.guess_num
-            total_small += player.guess_num
-            group.num_list_small += str(player.guess_num) + " "
+            if player.is_no_decision == False:
+                players_guess_dict_small[player] = player.guess_num
+                total_small += player.guess_num
+                group.num_list_small += str(player.guess_num) + " "
+                playing_player_small += 1
         
 
-    # 算出平均值，並乘以p值
-    mean_big = total_big / C.big_group_player_num
-    mean_small = total_small / C.small_group_player_num
 
-    p_mean_big = mean_big * C.p
-    p_mean_small = mean_small * C.p
-    min_distance_big = 100
-    min_distance_small = 100
-
-    # 算出每個數字與p*mean的差，並記錄最小的差為多少
-    for p in group.get_players():
-        if player.is_big_group == True:
-            if abs(players_guess_dict_big[p] - p_mean_big) <= min_distance_big:
-                min_distance_big = abs(players_guess_dict_big[p] - p_mean_big)
+    if playing_player_big > 0:
+        mean_big = total_big / C.big_group_player_num
+        group.p_mean_num_big = mean_big * C.p
+        min_distance_big = 100
+        for p in group.get_players():
+            if p.is_big_group == True:
+                if abs(players_guess_dict_big[p] - group.p_mean_num_big) <= min_distance_big:
+                    min_distance_big = abs(players_guess_dict_big[p] - group.p_mean_num_big)
+        n_winners_big = 0 # 有多少個贏家
+        win_num = -100
+        win2_num = -100
+        for player, num in players_guess_dict_big.items():
+            if abs(num - group.p_mean_num_big) == min_distance_big:
+                player.is_winner = True
+                n_winners_big += 1
+                if win_num != num and win_num != win2_num:
+                    win2_num = num
+                else:
+                    win_num = num
+            else:
+                player.payoff = C.consolation_prize
+        if win2_num == -100:
+            group.winner_number_big += str(win_num)
         else:
-            if abs(players_guess_dict_small[p] - p_mean_small) <= min_distance_small:
-                min_distance_small = abs(players_guess_dict_small[p] - p_mean_small)
-            
+            group.winner_number_big += str(win_num) + "、" + str(win2_num)
 
-    n_winners_big = 0 # 有多少個贏家
-    n_winners_small = 0
 
-    # 判斷獲勝的受試者，並給予對應的報酬
-    for player, num in players_guess_dict_big.items():
-        if (player.is_no_decision == False) and (abs(num - p_mean_big) == min_distance_big):
-            player.is_winner = True
-            n_winners_big += 1
-            group.p_mean_num_big = num
+    elif playing_player_small > 0:
+        mean_small = total_small / C.small_group_player_num
+        group.p_mean_num_small = mean_small * C.p
+        min_distance_small = 100
+        for p in group.get_players():
+            if p.is_small_group == True:
+                if abs(players_guess_dict_small[p] - group.p_mean_num_small) <= min_distance_small:
+                    min_distance_small = abs(players_guess_dict_small[p] - group.p_mean_num_small)
+        n_winners_small = 0 # 有多少個贏家
+        win3_num = -100
+        win4_num = -100
+        for player, num in players_guess_dict_big.items():
+            if abs(num - group.p_mean_num_small) == min_distance_small:
+                player.is_winner = True
+                n_winners_small += 1
+                if win3_num != num and win3_num != win4_num:
+                    win4_num = num
+                else:
+                    win3_num = num
+            else:
+                player.payoff = C.consolation_prize
+        if win4_num == -100:
+            group.winner_number_small += str(win3_num)
         else:
-            player.payoff = C.consolation_prize
-    
-    for player, num in players_guess_dict_small.items():
-        if (player.is_no_decision == False) and (abs(num - p_mean_small) == min_distance_small):
-            player.is_winner = True
-            n_winners_small += 1
-            group.p_mean_num_small = num
-        else:
-            player.payoff = C.consolation_prize
+            group.winner_number_small += str(win3_num) + "、" + str(win4_num)
+
     
 
     for player in group.get_players():
         if player.is_winner:
             if player.is_big_group:
                 player.payoff = C.winning_prize / n_winners_big
-            else:
+            elif player.is_small_group:
                 player.payoff = C.winning_prize / n_winners_small
+            else:
+                player.payoff = C.no_playing_prize
+    group.num_list_big = group.num_list_big[:-1]
+    group.num_list_small = group.num_list_small[:-1]
 
         
 
