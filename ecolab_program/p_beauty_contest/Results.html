@@ -24,26 +24,26 @@
     </p>
 
     <p>
-    {{ if group.p_mean_num == 0 }}
-        本回合的唯一最小正整數不存在！
-    {{ else }}
+    {{ if group.p_mean_num >= 0 }}
         {{ if player.participant.is_big_group }}
-            本回合贏家的數字是：{{ group.p_mean_num_big }}<br>
-        
+            {{ group.p_mean_num_big }}<br>
         {{ else }}
-            本回合贏家的數字是：{{ group.p_mean_num_small }}<br>
+            {{ group.p_mean_num_small }}<br>
+    {{ else }}
+        本回合沒有贏家。<br>
+        
     {{ endif }}
     </p>
 
     {{ if group.is_treatment }}
         {{ if player.participant.is_big_group }}
         <p>
-            {{ group.num_list_big }}
+            {{ group.num_list_big }}<br>
         </p>
 
-        {{ if group player.participant.is_big_group == False}}
+        {{ else }}
         <p>
-            {{ group.num_list_small }}
+            {{ group.num_list_small }}<br>
         </p>
 
     {{ endif }}

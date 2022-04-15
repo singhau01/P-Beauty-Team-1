@@ -62,20 +62,20 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
 
     if subsession.round_number == 1:
 
-        treatment = random.sample(subsession.get_players, C.PLAYERS_PER_GROUP) # 一半分到對照組，一半分到實驗組
-        control = list(set(subsession.get_players) - set(treatment))
+        treatment = random.sample(subsession.get_players(), C.PLAYERS_PER_GROUP) # 一半分到對照組，一半分到實驗組
+        control = list(set(subsession.get_players()) - set(treatment))
 
-        treatment_big = random.sample(treatment, C.big_number) # 實驗組抽10個，分為大組
+        treatment_big = random.sample(treatment, C.big_group_player_num) # 實驗組抽10個，分為大組
         treatment_small = list(set(treatment) - set(treatment_big)) # 實驗組剩3個為小組
-        control_big = random.sample(control, C.big_number) # 控制組抽10個，分為大組
+        control_big = random.sample(control, C.big_group_player_num) # 控制組抽10個，分為大組
         control_small = list(set(control) - set(control_big)) # 控制組抽3個，分為小組
 
-        for player in Group.get_players:
-            if Group.get_players == treatment:
-                Group.treatment == True
-        
-        for player in subsession.get_players:
-            participant = Player.participant
+            
+        for player in subsession.get_players():
+            if player in treatment:
+                player.group.is_treatment == True
+
+            participant = player.participant
             if player in treatment_big or player in control_big:
                 participant.is_big_group = True
 
