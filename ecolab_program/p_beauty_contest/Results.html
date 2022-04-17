@@ -30,10 +30,8 @@
             {{ else }}
             本回合沒有贏家
             {{ endif }}
-        {{ endif }}
 
-
-        {{ if player.is_small_group }}
+        {{ else }}
             {{ if group.p_mean_num_small >= 0}}
                 {{ group.winner_number_small }}<br>
             {{ else }}
