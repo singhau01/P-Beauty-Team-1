@@ -1,4 +1,3 @@
-from asyncio import FastChildWatcher
 from tokenize import group
 from otree.api import *
 
@@ -75,9 +74,16 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
     import random
 
     if subsession.round_number == 1:
-        player_list = subsession.get_players() # ㄙ
-        treatment = random.sample(player_list, C.PLAYERS_PER_GROUP)
-        control = list(set(player_list) - set(treatment))
+        subsession.group_randomly() # 隨機分組
+        player_list = subsession.get_players() # 所有玩家的List
+
+        treatment = [] 
+        control = []
+        for player in subsession.get_players():
+            if player.group.id_in_subsession == 1:
+                treatment.append(player) # 如果分到第一組則加入實驗組
+            else:
+                control.append(player) # 如果分到第二組則加入控制組
 
         treatment_big = random.sample(treatment, C.big_group_player_num) # 實驗組抽10個，分為大組
         treatment_small = list(set(treatment) - set(treatment_big)) # 實驗組剩3個為小組
@@ -85,49 +91,39 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
         control_small = list(set(control) - set(control_big)) # 控制組抽3個，分為小組
 
 
-        for player in subsession.get_players(): # 指定分組
+        for player in subsession.get_players(): 
             if player in treatment:
-                player.group.id_in_subsession = 1
+                player.group.is_treatment = True # 實驗組
+                player.participant.is_treatment = True # 存到participant
 
-                player.group.is_treatment = True
-                player.participant.is_treatment = True
-
-                if player in treatment_big:
+                if player in treatment_big: # 實驗組_大組
                     player.is_big_group = True
                     player.participant.is_big_group = True
                 else:
-                    player.is_big_group = False
+                    player.is_big_group = False # 實驗組_小組
                     player.participant.is_big_group = False
             else:
-                player.group.id_in_subsession = 2
 
-                player.group.is_treatment = False
+                player.group.is_treatment = False # 控制組
                 player.participant.is_treatment = False
 
-                if player in control_big:
+                if player in control_big: # 控制組大組
                     player.is_big_group = True
                     player.participant.is_big_group = True
                 else:
-                    player.is_big_group = False
+                    player.is_big_group = False # 控制組小組
                     player.participant.is_big_group = False
     
 
     else:
-        subsession.group_like_round(1)
-        for player in subsession.get_players(): # 指定分組
-            player.is_big_group = player.participant.is_big_group
-
-        for group in subsession.get_groups(): # 指定分組
-            group.is_treatment = player.participant.is_treatment
-
-
-
-
-
-
-
-
+        subsession.group_like_round(1) # 按第一回合分組
+        for player in subsession.get_players(): 
+            player.group.is_treatment = player.participant.is_treatment # 按第一回合分配實驗組
+            player.is_big_group = player.participant.is_big_group # 按第一回合分配控制組
             
+
+
+
 
 
 def set_payoffs(group):
@@ -196,7 +192,7 @@ def set_payoffs(group):
         win3_num = -100
         win4_num = -100
         for player, num in players_guess_dict_big.items():
-            if abs(num - player.p_mean_num_small) == min_distance_small:
+            if abs(num - group.p_mean_num_small) == min_distance_small:
                 player.is_winner = True
                 n_winners_small += 1
                 if win3_num != num and win3_num != win4_num:
