@@ -12,6 +12,16 @@
         .debug-info {
             display: none;
         }
+<<<<<<< Updated upstream
+=======
+        .hidden-area {
+            display: none;
+        }
+        .time-is-up-area {
+            color: red;
+            display: none;
+        }
+>>>>>>> Stashed changes
         .otree-timer {
             display: none;
         }
@@ -75,7 +85,17 @@
             display: none;
         }
     </style>
+<<<<<<< Updated upstream
     
+=======
+    {{ next_button }}
+
+    <div class="time-is-up-area">
+        「60秒後跳轉至下一頁」
+    </div>
+    
+
+>>>>>>> Stashed changes
     <script>
         var start_time = Date.now() // 回傳自 1970/01/01 00:00:00 UTC 起經過的毫秒數。
 
@@ -88,6 +108,7 @@
                 $('#id_decision_duration').val(duration.toFixed(1)) 
                 // JavaScript toFixed() Method: Convert a number into a string, keeping only N decimals
 
+<<<<<<< Updated upstream
                 var timeout_sec = {{ C.timeout_sec }}
                 var duration_integer = Math.ceil(duration)
 
@@ -97,12 +118,29 @@
                 }               
 
                 
+=======
+                var timeout_sec = {{ C.timeout_sec_result }}
+                var duration_integer = Math.ceil(duration)
+
+                // 倒數到指定秒數
+                if ((timeout_sec - duration_integer) === {{ C.timeout_sec_result }}) {
+                    $('.otree-timer').show();
+                }               
+
+                // 計算延遲幾秒後催促
+                if ((timeout_sec - duration_integer) === {{ C.alert_sec }}) {
+                    $('.time-is-up-area').show();
+                }
+>>>>>>> Stashed changes
             },
             0.1 * 1000 // 每 0.1秒呼叫一次function，所以如需更精確或更粗略，可調整成 0.01 * 1000 或 1 * 1000。（同時注意toFixed()）
             )
     </script>
 
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 {{ endblock }}
 
 
