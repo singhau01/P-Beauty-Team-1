@@ -14,7 +14,7 @@ class C(BaseConstants):
     NUM_ROUNDS = 4
 
     timeout_sec = 30  # 每一回合的決策時間
-    timeout_sec_result = 10
+    timeout_sec_result = 60
     timer_sec = 20  # 出現timer的剩餘時間
     alert_sec = 10  # 出現提醒字樣的剩餘時間
 
@@ -33,12 +33,6 @@ class C(BaseConstants):
     ans1 = 30
     ans2 = 10
     ans3 = 60
-
-
-
-
-
-
 
 
 class Subsession(BaseSubsession):
@@ -153,10 +147,6 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
         for player in subsession.get_players(): 
             player.group.is_treatment = player.participant.is_treatment # 按第一回合分配實驗組
             player.is_big_group = player.participant.is_big_group # 按第一回合分配控制組
-            
-
-
-
 
 
 def set_payoffs(group):
@@ -213,10 +203,9 @@ def set_payoffs(group):
         mean_big = total_big / playing_player_big
         group.p_mean_num_big = mean_big * C.p # 算出實驗組/對照組中，大組的最終數字
         min_distance_big = 100 # 最小距離
-        for p in group.get_players():
-            if p.is_big_group == True: # 求出大組最小距離
-                if abs(players_guess_dict_big[p] - group.p_mean_num_big) <= min_distance_big:
-                    min_distance_big = abs(players_guess_dict_big[p] - group.p_mean_num_big)
+        for player, num in players_guess_dict_big.items():
+            if abs(num - group.p_mean_num_big) <= min_distance_big:
+                min_distance_big = abs(num - group.p_mean_num_big)
         
         n_winners_big = 0 # 有多少個贏家
         win_num = -100 # 第一個贏家數字
@@ -247,10 +236,9 @@ def set_payoffs(group):
         mean_small = total_small / playing_player_small 
         group.p_mean_num_small = mean_small * C.p # 算出實驗組/對照組中，小組的最終數字
         min_distance_small = 100 # 最小距離
-        for p in group.get_players():
-            if p.is_big_group == False: # 求出小組最小距離
-                if abs(players_guess_dict_small[p] - group.p_mean_num_small) <= min_distance_small:
-                    min_distance_small = abs(players_guess_dict_small[p] - group.p_mean_num_small)
+        for player, num in players_guess_dict_small.items():
+                if abs(num - group.p_mean_num_small) <= min_distance_small:
+                    min_distance_small = abs(num - group.p_mean_num_small)
         
         n_winners_small = 0 # 有多少個贏家
         win3_num = -100 # 第一個贏家數字
@@ -309,7 +297,7 @@ class Test1(Page):
         return player.round_number == 1
     form_model = 'player'
     form_fields = ['test1']
-    timeout_seconds = 30
+    timeout_seconds = C.timeout_sec
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -319,7 +307,7 @@ class Test2(Page):
         return player.round_number == 1
     form_model = 'player'
     form_fields = ['test2']
-    timeout_seconds = 30
+    timeout_seconds = C.timeout_sec
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -329,7 +317,7 @@ class Test3(Page):
         return player.round_number == 1
     form_model = 'player'
     form_fields = ['test3']
-    timeout_seconds = 30
+    timeout_seconds = C.timeout_sec
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -353,6 +341,8 @@ class Results(Page):
 
 
 class Finish(Page):
+    timeout_secinds = 60
+
     @staticmethod
     def is_displayed(player):
         return player.round_number == C.NUM_ROUNDS
@@ -363,5 +353,4 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
-page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
-#Test1, Test2, Test3,
+page_sequence = [Instruction, Test1, Test2, Test3, DecisionPage, ResultsWaitPage, Results, Finish]
