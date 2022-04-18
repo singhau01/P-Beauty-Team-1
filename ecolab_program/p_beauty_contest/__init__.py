@@ -21,13 +21,17 @@ class C(BaseConstants):
     min_number = 0
     max_number = 100
 
-    winning_prize = 100
+    winning_prize = 120
     consolation_prize = 10
     
     big_group_player_num = 2 # 大組的人數
     small_group_player_num = 1 # 小組的人數
 
     no_playing_prize = 0
+
+    ans1 = 30
+    ans2 = 10
+    ans3 = 60
     
 
 
@@ -37,7 +41,7 @@ class C(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-    pass
+    treatment_list = models.StringField(initial="")
     
 
 class Group(BaseGroup):
@@ -56,6 +60,9 @@ class Group(BaseGroup):
     num_record_small = models.StringField(initial="") # 本回合小組所選的數字
     num_record_player = models.StringField(initial="") # 本回合所有玩家所選的數字
 
+    
+
+
 
 class Player(BasePlayer):
     is_big_group =  models.BooleanField()
@@ -67,13 +74,33 @@ class Player(BasePlayer):
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
 
+    test1 = models.IntegerField(label="請填入一個正整數:")
+    test2 = models.IntegerField(label="請填入一個正整數:")
+    test3 = models.IntegerField(label="請填入一個正整數:")
+
    
 
 
 
 
-
 # FUNCTIONS
+
+def test1_error_message(player, value):
+    print("value is", value)
+    if value != C.ans1:
+        return '最接近 2/3 倍的平均數的人才是贏家！'
+
+def test2_error_message(player, value):
+    print("value is", value)
+    if value != C.ans2:
+        return '每回合的贏家，可獲得報酬 120 元新台幣(超過一位玩家獲勝時，則均分報酬)，其餘玩家可獲得報酬 10 元新台幣。'
+
+def test3_error_message(player, value):
+    print("value is", value)
+    if value != C.ans3:
+        return '每回合的贏家，可獲得報酬 120 元新台幣(超過一位玩家獲勝時，則均分報酬)，其餘玩家可獲得報酬 10 元新台幣。'
+
+
 
 def creating_session(subsession):  # 把組別劃分成實驗組與控制組、大組或小組
     import random
@@ -270,6 +297,41 @@ class Instruction(Page):
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
+    @staticmethod
+    def vars_for_template(player: Player):  # built-in methods，將 total_payoff 的值傳到 html 頁面
+        return {
+            "num_player_1": C.PLAYERS_PER_GROUP - 1
+	    }
+
+class Test1(Page):
+    def is_displayed(player):
+        return player.round_number == 1
+    form_model = 'player'
+    form_fields = ['test1']
+    timeout_seconds = 30
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
+
+class Test2(Page):
+    def is_displayed(player):
+        return player.round_number == 1
+    form_model = 'player'
+    form_fields = ['test2']
+    timeout_seconds = 30
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
+
+class Test3(Page):
+    def is_displayed(player):
+        return player.round_number == 1
+    form_model = 'player'
+    form_fields = ['test3']
+    timeout_seconds = 30
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
 
 class DecisionPage(Page):
     form_model = 'player'
@@ -280,7 +342,6 @@ class DecisionPage(Page):
     def before_next_page(player, timeout_happened):  # built-in methods
         if timeout_happened:
             player.is_no_decision = True  # 若回合時間到，將 player 設定為沒有做決策
-
 
 class ResultsWaitPage(WaitPage): # built-in
     after_all_players_arrive = set_payoffs  # built-in methods，所有受試者都離開決策頁後，執行 set_payoffs
@@ -301,5 +362,4 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
-
-page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
+page_sequence = [Instruction, Test1, Test2, Test3, DecisionPage, ResultsWaitPage, Results, Finish]
