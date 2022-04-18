@@ -341,7 +341,7 @@ class Results(Page):
 
 
 class Finish(Page):
-    timeout_secinds = 60
+    timeout_seconds = 60
 
     @staticmethod
     def is_displayed(player):
