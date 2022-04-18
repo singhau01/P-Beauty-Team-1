@@ -14,6 +14,7 @@ class C(BaseConstants):
     NUM_ROUNDS = 4
 
     timeout_sec = 30  # 每一回合的決策時間
+    timeout_sec_result = 10
     timer_sec = 20  # 出現timer的剩餘時間
     alert_sec = 10  # 出現提醒字樣的剩餘時間
 
@@ -32,7 +33,7 @@ class C(BaseConstants):
     ans1 = 30
     ans2 = 10
     ans3 = 60
-    
+
 
 
 
@@ -53,7 +54,7 @@ class Group(BaseGroup):
     p_mean_num_big = models.FloatField(initial=-100) # 實驗組或控制組中，大組平均*P值的結果
 
     num_list_small = models.StringField(initial="被選到的號碼有：") # 小組贏家所選的數字
-    winner_number_small = models.StringField(initial="本回合的贏家數字是：") # 小組贏家所選的數字
+    winner_number_small = models.StringField(initial="本回合贏家的數字是：") # 小組贏家所選的數字
     p_mean_num_small = models.FloatField(initial=-100) # 實驗組或控制組中，小組平均*P值的結果
 
     num_record_big = models.StringField(initial="") # 本回合大組所選的數字
@@ -348,7 +349,7 @@ class ResultsWaitPage(WaitPage): # built-in
 
 
 class Results(Page):
-    pass
+    timeout_seconds = C.timeout_sec_result  # built-in
 
 
 class Finish(Page):
@@ -362,4 +363,5 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
-page_sequence = [Instruction, Test1, Test2, Test3, DecisionPage, ResultsWaitPage, Results, Finish]
+page_sequence = [Instruction, DecisionPage, ResultsWaitPage, Results, Finish]
+#Test1, Test2, Test3,
