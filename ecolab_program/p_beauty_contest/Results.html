@@ -24,27 +24,27 @@
     </p>
 
     <p>
-        {{ if player.is_big_group }}
+        {{ if player.is_big_group }} <!-- 大組若有人作答，大組給予大組的贏家數字 -->
             {{ if group.p_mean_num_big >= 0}}
-                {{ group.winner_number_big }}<br>
+                {{ group.winner_number_big }}
             {{ else }}
-            本回合沒有贏家
+            本回合無人作答。
             {{ endif }}
 
         {{ else }}
-            {{ if group.p_mean_num_small >= 0}}
-                {{ group.winner_number_small }}<br>
+            {{ if group.p_mean_num_small >= 0}} <!-- 小組若有人作答，小組給予小組的贏家數字 -->
+                {{ group.winner_number_small }}
             {{ else }}
-            本回合沒有贏家
+            本回合無人無人作答。
             {{ endif }}
         {{ endif }}
     </p>
 
-    {{ if group.is_treatment }}
-        {{ if player.is_big_group }}
+    {{ if group.is_treatment }}  <!-- 實驗組給予作答數字 -->
+        {{ if player.is_big_group }} <!-- 實驗組大組給予大組作答數字 -->
             {{ group.num_list_big }}<br>
         {{ else }}
-            {{ group.num_list_small }}<br>
+            {{ group.num_list_small }}<br> <!-- 實驗組小組給予小組作答數字 -->
         {{ endif }}
     {{ endif }}
 

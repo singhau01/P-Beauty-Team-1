@@ -1,4 +1,5 @@
 from tokenize import group
+from xml.dom.expatbuilder import ElementInfo
 from otree.api import *
 
 
@@ -9,23 +10,22 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = 3
+    PLAYERS_PER_GROUP = 3 # 實驗組與控制組的人數
     NUM_ROUNDS = 4
 
-    # player_per_group = 3
     timeout_sec = 30  # 每一回合的決策時間
     timer_sec = 20  # 出現timer的剩餘時間
     alert_sec = 10  # 出現提醒字樣的剩餘時間
 
-    p = 2/3
+    p = 2/3 
     min_number = 0
     max_number = 100
 
     winning_prize = 100
     consolation_prize = 10
     
-    big_group_player_num = 2
-    small_group_player_num = 1
+    big_group_player_num = 2 # 大組的人數
+    small_group_player_num = 1 # 小組的人數
 
     no_playing_prize = 0
     
@@ -44,15 +44,17 @@ class Group(BaseGroup):
     is_treatment = models.BooleanField()  #實驗組與控制組
     time_pressure = models.BooleanField
     
-    num_list_big = models.StringField(initial="被選到的號碼有：")
-    winner_number_big = models.StringField(initial="本回合贏家的數字是：")
-    p_mean_num_big = models.FloatField(initial=-100)
+    num_list_big = models.StringField(initial="被選到的號碼有：") # 大組贏家所選的數字
+    winner_number_big = models.StringField(initial="本回合贏家的數字是：") # 大組贏家所選的數字
+    p_mean_num_big = models.FloatField(initial=-100) # 實驗組或控制組中，大組平均*P值的結果
 
-    num_list_small = models.StringField(initial="被選到的號碼有：")
-    winner_number_small = models.StringField(initial="本回合的贏家數字是：")
-    p_mean_num_small = models.FloatField(initial=-100)
+    num_list_small = models.StringField(initial="被選到的號碼有：") # 小組贏家所選的數字
+    winner_number_small = models.StringField(initial="本回合的贏家數字是：") # 小組贏家所選的數字
+    p_mean_num_small = models.FloatField(initial=-100) # 實驗組或控制組中，小組平均*P值的結果
 
-    
+    num_record_big = models.StringField(initial="") # 本回合大組所選的數字
+    num_record_small = models.StringField(initial="") # 本回合小組所選的數字
+    num_record_player = models.StringField(initial="") # 本回合所有玩家所選的數字
 
 
 class Player(BasePlayer):
@@ -64,6 +66,9 @@ class Player(BasePlayer):
     
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
+
+   
+
 
 
 
@@ -127,53 +132,83 @@ def creating_session(subsession):  # 把組別劃分成實驗組與控制組、�
 
 
 def set_payoffs(group):
-    players_guess_dict_big = {}  # {guess_num: players}
-    players_guess_dict_small = {}
-    total_big = 0
-    total_small = 0
-    playing_player_big = 0
-    playing_player_small = 0
+    players_guess_dict_big = {}  # 大組玩家數字的dictionary{players: guess_num}
+    players_guess_dict_small = {} # 小組玩家數字的dictionary{players: guess_num}
+    total_big = 0 # 大組玩家的總和
+    total_small = 0 # 小組玩家的總和
+    playing_player_big = 0 # 大組有效玩家數量
+    playing_player_small = 0  # 小組有效玩家數量
 
 
-    # 將所有受試者的數字以 dictionary 形式存下來
+    # 將所有受試者的數字以 dictionary 形式存下來，將數字加總，並計算有效玩家
     for player in group.get_players():
-        if player.is_big_group:
-            if player.is_no_decision == False:
+        if player.is_big_group: 
+            if player.is_no_decision == False: 
                 players_guess_dict_big[player] = player.guess_num
                 total_big += player.guess_num
-                group.num_list_big += str(player.guess_num) + " "
                 playing_player_big += 1
 
         else:
             if player.is_no_decision == False:
                 players_guess_dict_small[player] = player.guess_num
                 total_small += player.guess_num
-                group.num_list_small += str(player.guess_num) + " "
                 playing_player_small += 1
-        
+
+    # 有效玩家數字列成表
+    counter1 = 0
+    for player, num in players_guess_dict_big.items():
+        if counter1 < len(players_guess_dict_big):
+            group.num_list_big += str(num)+ "、"
+            counter1 += 1
+        else:
+            group.num_list_big += str(num)
+        group.num_record_big += str(num) + " " # 紀錄本回合大組玩家數字
+        group.num_record_player += str(num) + " " # 紀錄本回合所有玩家數字
+
+
+    counter2 = 0
+    for player, num in players_guess_dict_small.items():
+        if counter2 < len(players_guess_dict_small):
+            group.num_list_small += str(num)+ "、"
+            counter2 += 1
+        else:
+            group.num_list_small += str(num)
+
+        group.num_record_small += str(num) + " "  # 紀錄本回合小組玩家數字
+        group.num_record_player += str(num) + " " # 紀錄本回合所有玩家數字
+
+    
+
 
 
     if playing_player_big > 0:
         mean_big = total_big / playing_player_big
-        group.p_mean_num_big = mean_big * C.p
-        min_distance_big = 100
+        group.p_mean_num_big = mean_big * C.p # 算出實驗組/對照組中，大組的最終數字
+        min_distance_big = 100 # 最小距離
         for p in group.get_players():
-            if p.is_big_group == True:
+            if p.is_big_group == True: # 求出大組最小距離
                 if abs(players_guess_dict_big[p] - group.p_mean_num_big) <= min_distance_big:
                     min_distance_big = abs(players_guess_dict_big[p] - group.p_mean_num_big)
+        
         n_winners_big = 0 # 有多少個贏家
-        win_num = -100
-        win2_num = -100
+        win_num = -100 # 第一個贏家數字
+        win2_num = -100 # 第二個贏家數字
+        win_num_count = 0 # 幾個贏家數字(0, 1, 2)
         for player, num in players_guess_dict_big.items():
-            if abs(num - group.p_mean_num_big) == min_distance_big:
-                player.is_winner = True
-                n_winners_big += 1
-                if win_num != num and win_num != win2_num:
-                    win2_num = num
-                else:
+            if abs(num - group.p_mean_num_big) == min_distance_big: # 如果是最小距離則進入條件式
+                player.is_winner = True # 玩家為贏家
+                n_winners_big += 1 # 贏家數 + 1
+
+                if win_num_count == 0: # 如果還沒統計到贏家數字，則符合條件第一個為win_num
                     win_num = num
+                    win_num_count += 1
+                
+                if win_num_count == 1 and num != win_num: # 已經統計到一個數字，但不是win_num，即為win2_num
+                    win2_num = num
+                    win_num_count += 1
+            
             else:
-                player.payoff = C.consolation_prize
+                player.payoff = C.consolation_prize # 如果不是最小距離則為輸家，給予獎勵
         if win2_num == -100:
             group.winner_number_big += str(win_num)
         else:
@@ -181,24 +216,30 @@ def set_payoffs(group):
 
 
     if playing_player_small > 0:
-        mean_small = total_small / playing_player_small
-        group.p_mean_num_small = mean_small * C.p
-        min_distance_small = 100
+        mean_small = total_small / playing_player_small 
+        group.p_mean_num_small = mean_small * C.p # 算出實驗組/對照組中，小組的最終數字
+        min_distance_small = 100 # 最小距離
         for p in group.get_players():
-            if p.is_big_group == False:
+            if p.is_big_group == False: # 求出小組最小距離
                 if abs(players_guess_dict_small[p] - group.p_mean_num_small) <= min_distance_small:
                     min_distance_small = abs(players_guess_dict_small[p] - group.p_mean_num_small)
+        
         n_winners_small = 0 # 有多少個贏家
-        win3_num = -100
-        win4_num = -100
-        for player, num in players_guess_dict_big.items():
-            if abs(num - group.p_mean_num_small) == min_distance_small:
-                player.is_winner = True
-                n_winners_small += 1
-                if win3_num != num and win3_num != win4_num:
-                    win4_num = num
-                else:
+        win3_num = -100 # 第一個贏家數字
+        win4_num = -100 # 第二個贏家數字
+        win_num_count = 0 # 幾個贏家數字(0, 1, 2)
+        for player, num in players_guess_dict_small.items():
+            if abs(num - group.p_mean_num_small) == min_distance_small: # 如果是最小距離則進入條件式
+                player.is_winner = True # 玩家為贏家
+                n_winners_small += 1 # 贏家數 + 1
+
+                if win_num_count == 0: # 如果還沒統計到贏家數字，則符合條件第一個為win3_num
                     win3_num = num
+                    win_num_count += 1
+                
+                if win_num_count == 1 and num != win3_num: # 已經統計到一個數字，但不是win3_num，即為win4_num
+                    win4_num = num
+                    win_num_count += 1
             else:
                 player.payoff = C.consolation_prize
         if win4_num == -100:
@@ -214,8 +255,9 @@ def set_payoffs(group):
                 player.payoff = C.winning_prize / n_winners_big
             elif player.is_big_group == False:
                 player.payoff = C.winning_prize / n_winners_small
-            else:
-                player.payoff = C.no_playing_prize
+
+        if player.is_no_decision == True:
+            player.payoff = C.no_playing_prize
 
     group.num_list_big = group.num_list_big[:-1]
     group.num_list_small = group.num_list_small[:-1]
