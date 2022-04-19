@@ -13,7 +13,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = 3 # 實驗組與控制組的人數
     NUM_ROUNDS = 4
 
-    timeout_sec = 30  # 每一回合的決策時間
+    timeout_sec = 60  # 每一回合的決策時間
     timeout_sec_result = 60
     timer_sec = 20  # 出現timer的剩餘時間
     alert_sec = 10  # 出現提醒字樣的剩餘時間
@@ -28,7 +28,7 @@ class C(BaseConstants):
     big_group_player_num = 2 # 大組的人數
     small_group_player_num = 1 # 小組的人數
 
-    no_playing_prize = 0
+    noplaying_prize = 10
 
     ans1 = 30
     ans2 = 10
@@ -274,7 +274,7 @@ def set_payoffs(group):
                 player.payoff = C.winning_prize / n_winners_small
 
         if player.is_no_decision == True:
-            player.payoff = C.no_playing_prize
+            player.payoff = C.noplaying_prize
 
     group.num_list_big = group.num_list_big[:-1]
     group.num_list_small = group.num_list_small[:-1]
