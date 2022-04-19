@@ -15,6 +15,9 @@
         .otree-timer {
             display: none;
         }
+        .hidden-area {
+            display: none;
+        }
     </style>
 
     
@@ -91,7 +94,7 @@
                 var duration = (Date.now() - start_time) / 1000 // 因原數字為毫秒，需除以 1000 取得秒數。
 
                 // 每秒不斷更新 decision_duration
-                $('#id_decision_duration').val(duration.toFixed(1)) 
+                $('#id_result_duration').val(duration.toFixed(1)) 
                 // JavaScript toFixed() Method: Convert a number into a string, keeping only N decimals
 
                 var timeout_sec = {{ C.timeout_sec }}

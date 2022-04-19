@@ -68,6 +68,7 @@ class Player(BasePlayer):
     
     decision_duration = models.FloatField(initial=0)  # 決策時間
     is_no_decision = models.BooleanField(initial=False)  # 是否有進行決策
+    result_duration = models.FloatField(initial=0)
 
     test1 = models.IntegerField(label="請填入一個正整數:")
     test2 = models.IntegerField(label="請填入一個正整數:")
@@ -338,6 +339,8 @@ class ResultsWaitPage(WaitPage): # built-in
 
 class Results(Page):
     timeout_seconds = C.timeout_sec_result  # built-in
+    form_model = "player"
+    form_fields = ["result_duration"]
 
 
 class Finish(Page):
