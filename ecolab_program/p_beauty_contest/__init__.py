@@ -13,7 +13,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = 3 # 實驗組與控制組的人數
     NUM_ROUNDS = 4
 
-    timeout_sec = 60  # 每一回合的決策時間
+    timeout_sec = 30  # 每一回合的決策時間
     timeout_sec_result = 60
     timer_sec = 20  # 出現timer的剩餘時間
     alert_sec = 10  # 出現提醒字樣的剩餘時間
