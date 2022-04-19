@@ -43,11 +43,11 @@ class Group(BaseGroup):
     is_treatment = models.BooleanField()  #實驗組與控制組
     time_pressure = models.BooleanField
     
-    num_list_big = models.StringField(initial="被選到的號碼有：") # 大組贏家所選的數字
+    num_list_big = models.StringField(initial="所有被選到的號碼有：") # 大組贏家所選的數字
     winner_number_big = models.StringField(initial="本回合贏家的數字是：") # 大組贏家所選的數字
     p_mean_num_big = models.FloatField(initial=-100) # 實驗組或控制組中，大組平均*P值的結果
 
-    num_list_small = models.StringField(initial="被選到的號碼有：") # 小組贏家所選的數字
+    num_list_small = models.StringField(initial="所有被選到的號碼有：") # 小組贏家所選的數字
     winner_number_small = models.StringField(initial="本回合贏家的數字是：") # 小組贏家所選的數字
     p_mean_num_small = models.FloatField(initial=-100) # 實驗組或控制組中，小組平均*P值的結果
 
