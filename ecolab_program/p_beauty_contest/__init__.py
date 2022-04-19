@@ -55,6 +55,9 @@ class Group(BaseGroup):
     num_record_small = models.StringField(initial="") # 本回合小組所選的數字
     num_record_player = models.StringField(initial="") # 本回合所有玩家所選的數字
 
+    mean_num_big = models.FloatField(initial=0) # 實驗組或控制組中，大組的平均
+    mean_num_small = models.FloatField(initial=0) # 實驗組或控制組中，小組的平均
+
     
 
 
@@ -202,7 +205,8 @@ def set_payoffs(group):
 
     if playing_player_big > 0:
         mean_big = total_big / playing_player_big
-        group.p_mean_num_big = mean_big * C.p # 算出實驗組/對照組中，大組的最終數字
+        group.mean_num_big = round(mean_big, 2)
+        group.p_mean_num_big = round(mean_big * C.p, 2) # 算出實驗組/對照組中，大組的最終數字
         min_distance_big = 100 # 最小距離
         for player, num in players_guess_dict_big.items():
             if abs(num - group.p_mean_num_big) <= min_distance_big:
@@ -235,7 +239,8 @@ def set_payoffs(group):
 
     if playing_player_small > 0:
         mean_small = total_small / playing_player_small 
-        group.p_mean_num_small = mean_small * C.p # 算出實驗組/對照組中，小組的最終數字
+        group.mean_num_small = round(mean_small, 2)
+        group.p_mean_num_small = round(mean_small * C.p, 2) # 算出實驗組/對照組中，小組的最終數字
         min_distance_small = 100 # 最小距離
         for player, num in players_guess_dict_small.items():
                 if abs(num - group.p_mean_num_small) <= min_distance_small:
