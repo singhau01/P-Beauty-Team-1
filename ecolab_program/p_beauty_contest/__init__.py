@@ -301,7 +301,7 @@ class Instruction(Page):
 class Test1(Page):
     form_model = 'player'
     form_fields = ['test1']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -316,7 +316,7 @@ class Ans1(Page):
 class Test2(Page):
     form_model = 'player'
     form_fields = ['test2']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -330,7 +330,7 @@ class Ans2(Page):
 class Test3(Page):
     form_model = 'player'
     form_fields = ['test3']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
