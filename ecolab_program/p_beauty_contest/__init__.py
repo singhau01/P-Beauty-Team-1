@@ -306,7 +306,7 @@ class Instruction(Page):
 class Test1(Page):
     form_model = 'player'
     form_fields = ['test1']
-    timeout_seconds = 30
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -314,14 +314,14 @@ class Test1(Page):
 class Ans1(Page):
     @staticmethod
     def is_displayed(player):  # built-in methods
-        return player.round_number == 1 and player.test1 != C.ans1 # 只有 round 1 要有實驗說明
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
     timeout_seconds = 20
     
 
 class Test2(Page):
     form_model = 'player'
     form_fields = ['test2']
-    timeout_seconds = 30
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -329,13 +329,13 @@ class Test2(Page):
 class Ans2(Page):
     @staticmethod
     def is_displayed(player):  # built-in methods
-        return player.round_number == 1 and player.test2 != C.ans2 # 只有 round 1 要有實驗說明
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
     timeout_seconds = 20
 
 class Test3(Page):
     form_model = 'player'
     form_fields = ['test3']
-    timeout_seconds = 30
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
@@ -343,7 +343,7 @@ class Test3(Page):
 class Ans3(Page):
     @staticmethod
     def is_displayed(player):  # built-in methods
-        return player.round_number == 1 and player.test3 != C.ans3 # 只有 round 1 要有實驗說明
+        return player.round_number == 1  # 只有 round 1 要有實驗說明
     timeout_seconds = 20
 
 class DecisionPage(Page):
