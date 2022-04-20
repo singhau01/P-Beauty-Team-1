@@ -294,8 +294,13 @@ class Instruction(Page):
         return player.round_number == 1  # 只有 round 1 要有實驗說明
     @staticmethod
     def vars_for_template(player: Player):  # built-in methods，將 total_payoff 的值傳到 html 頁面
+        if player.is_big_group == True:
+            player_num = 7
+        else:
+            player_num = 3
+        
         return {
-            "num_player_1": C.PLAYERS_PER_GROUP - 1
+            "num_player_1": player_num - 1
 	    }
 
 class Test1(Page):
