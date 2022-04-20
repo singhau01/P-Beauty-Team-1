@@ -299,34 +299,47 @@ class Instruction(Page):
 	    }
 
 class Test1(Page):
-    def is_displayed(player):
-        return player.round_number == 1
     form_model = 'player'
     form_fields = ['test1']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
+
+class Ans1(Page):
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1 and player.test1 != C.ans1 # 只有 round 1 要有實驗說明
+    timeout_seconds = 20
+    
 
 class Test2(Page):
-    def is_displayed(player):
-        return player.round_number == 1
     form_model = 'player'
     form_fields = ['test2']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
 
+class Ans2(Page):
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1 and player.test2 != C.ans2 # 只有 round 1 要有實驗說明
+    timeout_seconds = 20
+
 class Test3(Page):
-    def is_displayed(player):
-        return player.round_number == 1
     form_model = 'player'
     form_fields = ['test3']
-    timeout_seconds = C.timeout_sec
+    timeout_seconds = 60
     @staticmethod
     def is_displayed(player):  # built-in methods
         return player.round_number == 1  # 只有 round 1 要有實驗說明
+
+class Ans3(Page):
+    @staticmethod
+    def is_displayed(player):  # built-in methods
+        return player.round_number == 1 and player.test3 != C.ans3 # 只有 round 1 要有實驗說明
+    timeout_seconds = 20
 
 class DecisionPage(Page):
     form_model = 'player'
@@ -361,4 +374,4 @@ class Finish(Page):
             "total_payoff": sum([p.payoff for p in player.in_all_rounds()])
 	    }
 
-page_sequence = [Instruction, Test1, Test2, Test3, DecisionPage, ResultsWaitPage, Results, Finish]
+page_sequence = [Instruction, Test1, Ans1, Test2, Ans2, Test3, Ans3, DecisionPage, ResultsWaitPage, Results, Finish]
