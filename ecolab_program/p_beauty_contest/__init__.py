@@ -10,7 +10,7 @@ doc = """
 
 class C(BaseConstants):
     NAME_IN_URL = 'p_beauty_contest'
-    PLAYERS_PER_GROUP = 3 # 實驗組與控制組的人數
+    PLAYERS_PER_GROUP = 10 # 實驗組與控制組的人數
     NUM_ROUNDS = 6
 
     timeout_sec = 30  # 每一回合的決策時間
@@ -25,8 +25,8 @@ class C(BaseConstants):
     winning_prize = 120
     consolation_prize = 10
     
-    big_group_player_num = 2 # 大組的人數
-    small_group_player_num = 1 # 小組的人數
+    big_group_player_num = 7 # 大組的人數
+    small_group_player_num = 3 # 小組的人數
 
     noplaying_prize = 10
 
